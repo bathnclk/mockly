@@ -15,7 +15,8 @@ function PdfViewer({
   numPages,
   setNumPages,
   onPdfClick,
-}) {
+  questions,
+}){
   const pageContainerRef = useRef(null);
   function handlePageClick(event) {
     if (!pageContainerRef.current) return;
@@ -88,6 +89,32 @@ function PdfViewer({
                   });
                 }}
               />
+              {questions
+  .filter((question) => question.page === currentPage)
+  .map((question) => (
+    <div
+      key={question.id}
+      style={{
+        position: "absolute",
+        left: `${question.x * 100}%`,
+        top: `${question.y * 100}%`,
+        width: "38px",
+        height: "38px",
+        borderRadius: "50%",
+        background: "#2563eb",
+        color: "white",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        fontWeight: "bold",
+        transform: "translate(-50%, -50%)",
+        cursor: "pointer",
+        zIndex: 10,
+      }}
+    >
+      {question.number}
+    </div>
+))}
             </div>
           </Document>
 

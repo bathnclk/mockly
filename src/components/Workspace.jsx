@@ -26,17 +26,15 @@ function Workspace() {
   return (
     <section className="workspace">
       <PdfViewer
-        pdfFile={pdfFile}
-        setPdfFile={setPdfFile}
-        currentPage={currentPage}
-        setCurrentPage={setCurrentPage}
-        numPages={numPages}
-        setNumPages={setNumPages}
-        onPageRendered={(size) => {
-          setPageSize(size);
-        }}
-        onPdfClick={handlePdfClick}
-      />
+  pdfFile={pdfFile}
+  setPdfFile={setPdfFile}
+  currentPage={currentPage}
+  setCurrentPage={setCurrentPage}
+  numPages={numPages}
+  setNumPages={setNumPages}
+  onPdfClick={handlePdfClick}
+  questions={questions}
+/>
       <div className="debug-panel">
         {questions.map((q) => (
           <div key={q.id}>
