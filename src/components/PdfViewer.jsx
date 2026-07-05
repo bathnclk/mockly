@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
+
+import QuestionLayer from "./QuestionLayer";
 
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
@@ -16,32 +18,49 @@ function PdfViewer({
   setNumPages,
   onPdfClick,
   questions,
+  activeTool,
+  onDeleteQuestion,
+  onQuestionMouseDown,
+  moveQuestion,
+draggingQuestionId,
+onPointerUp,
 }){
   const pageContainerRef = useRef(null);
+   
   function handlePageClick(event) {
+    if (activeTool !== "question") return;
     if (!pageContainerRef.current) return;
 
     const rect = pageContainerRef.current.getBoundingClientRect();
+ 
 
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
 
     const normalizedX = mouseX / rect.width;
     const normalizedY = mouseY / rect.height;
+ 
 
     onPdfClick({
       page: currentPage,
       x: normalizedX,
       y: normalizedY,
     });
+ 
   }
-  useEffect(() => {
-    if (!pageContainerRef.current) return;
+  function handlePointerMove(event) {
+  if (!draggingQuestionId) return;
 
-    const rect = pageContainerRef.current.getBoundingClientRect();
+  if (!pageContainerRef.current) return;
 
-    console.log(rect.width, rect.height);
-  }, [currentPage]);
+  const rect = pageContainerRef.current.getBoundingClientRect();
+
+  const x = (event.clientX - rect.left) / rect.width;
+  const y = (event.clientY - rect.top) / rect.height;
+
+  moveQuestion(draggingQuestionId, x, y);
+}
+  
 
   function handleFileChange(event) {
     const file = event.target.files[0];
@@ -71,50 +90,26 @@ function PdfViewer({
             }}
           >
             <div
-              ref={pageContainerRef}
-              className="pdf-page-container"
-              onClick={handlePageClick}
-            >
+    ref={pageContainerRef}
+    className="pdf-page-container"
+    onClick={handlePageClick}
+    onPointerMove={handlePointerMove}
+    onPointerUp={onPointerUp}
+    onPointerLeave={onPointerUp} 
+>
               <Page
                 pageNumber={currentPage}
                 width={800}
                 renderAnnotationLayer={false}
-                renderTextLayer={false}
-                onRenderSuccess={() => {
-                  requestAnimationFrame(() => {
-                    if (!pageContainerRef.current) return;
-
-                    const rect =
-                      pageContainerRef.current.getBoundingClientRect();
-                  });
-                }}
+                renderTextLayer={false} 
               />
-              {questions
-  .filter((question) => question.page === currentPage)
-  .map((question) => (
-    <div
-      key={question.id}
-      style={{
-        position: "absolute",
-        left: `${question.x * 100}%`,
-        top: `${question.y * 100}%`,
-        width: "38px",
-        height: "38px",
-        borderRadius: "50%",
-        background: "#2563eb",
-        color: "white",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        fontWeight: "bold",
-        transform: "translate(-50%, -50%)",
-        cursor: "pointer",
-        zIndex: 10,
-      }}
-    >
-      {question.number}
-    </div>
-))}
+             <QuestionLayer
+  questions={questions}
+  currentPage={currentPage}
+  activeTool={activeTool}
+  onDeleteQuestion={onDeleteQuestion}
+  onQuestionMouseDown={onQuestionMouseDown} 
+/>
             </div>
           </Document>
 

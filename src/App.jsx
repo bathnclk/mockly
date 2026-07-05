@@ -98,6 +98,7 @@ function App() {
         setQuestions={setQuestions}
         activeQuestionId={activeQuestionId}
         setActiveQuestionId={setActiveQuestionId}
+        activeTool={activeTool}
       />
       {showStats && (
         <StatsModal questions={questions} onClose={() => setShowStats(false)} />

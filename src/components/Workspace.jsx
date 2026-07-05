@@ -1,7 +1,9 @@
 import { useState } from "react";
 import PdfViewer from "./PdfViewer";
 
-function Workspace() {
+function Workspace({
+  activeTool,
+}) {
   const [pdfFile, setPdfFile] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(0);
@@ -9,6 +11,21 @@ function Workspace() {
   const [numPages, setNumPages] = useState(0);
 
   const [questions, setQuestions] = useState([]);
+
+  const [draggingQuestionId, setDraggingQuestionId] = useState(null);
+
+const [isDragging, setIsDragging] = useState(false);
+
+const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+
+function handleQuestionMouseDown(id) {
+  console.log("MouseDown:", id);
+
+  if (activeTool !== "question") return;
+
+  setDraggingQuestionId(id);
+  setIsDragging(true);
+}
 
   function handlePdfClick(position) {
     setQuestions((current) => [
@@ -23,6 +40,33 @@ function Workspace() {
       },
     ]);
   }
+  function handleDeleteQuestion(id) {
+  setQuestions((current) =>
+    current.filter((question) => question.id !== id)
+  );
+}
+
+
+
+function moveQuestion(id, x, y) {
+  setQuestions((current) =>
+    current.map((question) =>
+      question.id === id
+        ? {
+            ...question,
+            x,
+            y,
+          }
+        : question
+    )
+  );
+}
+
+function handlePointerUp() {
+  setDraggingQuestionId(null);
+  setIsDragging(false);
+}
+
   return (
     <section className="workspace">
       <PdfViewer
@@ -34,6 +78,12 @@ function Workspace() {
   setNumPages={setNumPages}
   onPdfClick={handlePdfClick}
   questions={questions}
+  activeTool={activeTool}
+  onDeleteQuestion={handleDeleteQuestion}
+  onQuestionMouseDown={handleQuestionMouseDown}
+  moveQuestion={moveQuestion}
+  draggingQuestionId={draggingQuestionId}
+  onPointerUp={handlePointerUp}
 />
       <div className="debug-panel">
         {questions.map((q) => (
