@@ -2,21 +2,28 @@ import { useState } from "react";
 import PdfViewer from "./PdfViewer";
 
 function Workspace({
-  activeTool,
+    activeTool,
+    examStatus,
+    questions,
+    setQuestions,
+    activeQuestionId,
+    setActiveQuestionId, 
+    drawings,
+setDrawings,
 }) {
   const [pdfFile, setPdfFile] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(0);
 
   const [numPages, setNumPages] = useState(0);
-
-  const [questions, setQuestions] = useState([]);
+ 
 
   const [draggingQuestionId, setDraggingQuestionId] = useState(null);
 
 const [isDragging, setIsDragging] = useState(false);
 
 const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+ 
 
 function handleQuestionMouseDown(id) {
   console.log("MouseDown:", id);
@@ -66,7 +73,20 @@ function handlePointerUp() {
   setDraggingQuestionId(null);
   setIsDragging(false);
 }
+function handleQuestionClick(id) {
+    setActiveQuestionId(id);
 
+    setQuestions(current =>
+        current.map(question =>
+            question.id === id
+                ? {
+                    ...question,
+                    elapsedSeconds: question.elapsedSeconds + 1,
+                }
+                : question
+        )
+    );
+}
   return (
     <section className="workspace">
       <PdfViewer
@@ -84,6 +104,10 @@ function handlePointerUp() {
   moveQuestion={moveQuestion}
   draggingQuestionId={draggingQuestionId}
   onPointerUp={handlePointerUp}
+  onQuestionClick={handleQuestionClick}
+  activeQuestionId={activeQuestionId}
+  drawings={drawings}
+ setDrawings={setDrawings}
 />
       <div className="debug-panel">
         {questions.map((q) => (

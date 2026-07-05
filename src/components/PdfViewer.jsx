@@ -6,6 +6,7 @@ import QuestionLayer from "./QuestionLayer";
 
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
+import DrawingCanvas from "./DrawingCanvas";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -24,6 +25,11 @@ function PdfViewer({
   moveQuestion,
 draggingQuestionId,
 onPointerUp,
+onQuestionClick,
+
+  activeQuestionId,
+  drawings,
+setDrawings
 }){
   const pageContainerRef = useRef(null);
    
@@ -103,14 +109,24 @@ onPointerUp,
                 renderAnnotationLayer={false}
                 renderTextLayer={false} 
               />
+              <DrawingCanvas
+    currentPage={currentPage}
+    drawings={drawings}
+    setDrawings={setDrawings}
+    activeTool={activeTool}
+/>
+
              <QuestionLayer
   questions={questions}
   currentPage={currentPage}
   activeTool={activeTool}
   onDeleteQuestion={onDeleteQuestion}
   onQuestionMouseDown={onQuestionMouseDown} 
+  onQuestionClick={onQuestionClick}
+  activeQuestionId={activeQuestionId}
 />
             </div>
+            
           </Document>
 
           <div className="pdf-controls">

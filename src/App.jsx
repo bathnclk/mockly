@@ -24,7 +24,8 @@ function App() {
 
   const [examMinutes, setExamMinutes] = useState(150);
 
-  const [showFinishConfirmModal, setShowFinishConfirmModal] = useState(false);
+  const [showFinishConfirmModal, setShowFinishConfirmModal] = useState(false); 
+  const [drawings, setDrawings] = useState({});
 
   function startExam() {
     setRemainingSeconds(examMinutes * 60);
@@ -98,7 +99,9 @@ function App() {
         setQuestions={setQuestions}
         activeQuestionId={activeQuestionId}
         setActiveQuestionId={setActiveQuestionId}
-        activeTool={activeTool}
+        activeTool={activeTool} 
+        drawings={drawings}
+setDrawings={setDrawings}
       />
       {showStats && (
         <StatsModal questions={questions} onClose={() => setShowStats(false)} />

@@ -8,7 +8,7 @@ function QuestionMarker({
   activeTool,
   onDeleteQuestion,
   pageWidth,
-  pageHeight,
+  pageHeight, 
 }) {
   return (
     <div

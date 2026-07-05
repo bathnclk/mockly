@@ -112,20 +112,7 @@ button {
   justify-content: space-between;
   padding: 14px 0;
   border-bottom: 1px solid #e5e7eb;
-}
-.drawing-canvas {
-  position: absolute;
-
-  inset: 32px;
-
-  width: calc(100% - 64px);
-
-  height: calc(100% - 64px);
-
-  z-index: 5;
-
-  cursor: crosshair;
-}
+} 
 
 .fake-exam-page {
   position: relative;
@@ -181,4 +168,35 @@ button {
 }
 .pdf-page-container {
     position: relative;
+}
+
+.drawing-canvas{
+    z-index:5;
+}
+.drawing-canvas{
+
+position:absolute;
+
+left:0;
+top:0;
+
+width:800px;
+height:1131px;
+
+z-index:5;
+}
+.question-item{
+    z-index:10;
+}
+
+.drawing-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
 }

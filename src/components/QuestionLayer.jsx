@@ -8,6 +8,8 @@ function QuestionLayer({
   onQuestionMouseDown,
   pageWidth,
   pageHeight,
+  onQuestionClick,
+  activeQuestionId,
 }) {
   return (
     <>
@@ -22,6 +24,8 @@ function QuestionLayer({
   onMouseDown={() => onQuestionMouseDown(question.id)}
   pageWidth={pageWidth}
   pageHeight={pageHeight}
+  onClick={() => onQuestionClick(question.id)}  
+  isActive={question.id === activeQuestionId} 
 />
         ))}
     </>
