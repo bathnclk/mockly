@@ -37,15 +37,17 @@ function QuestionMarker({
   {question.number}
 </button>
 
-      {question.elapsedSeconds > 0 && (
-        <div
-          className={`question-timer ${
-            isActive ? "question-timer-active" : "question-timer-passive"
-          }`}
-        >
-          {formatQuestionTime(question.elapsedSeconds)}
-        </div>
-      )}
+      {(question.elapsedSeconds > 0 || isActive) && (
+    <div
+      className={`question-timer ${
+        isActive
+          ? "question-timer-active"
+          : "question-timer-passive"
+      }`}
+    >
+      {formatQuestionTime(question.elapsedSeconds)}
+    </div>
+)}
     </div>
   );
 }

@@ -25,7 +25,7 @@ function App() {
   const [examMinutes, setExamMinutes] = useState(150);
 
   const [showFinishConfirmModal, setShowFinishConfirmModal] = useState(false); 
-  const [drawings, setDrawings] = useState({});
+  const [drawings, setDrawings] = useState([]);
 
   function startExam() {
     setRemainingSeconds(examMinutes * 60);

@@ -74,18 +74,7 @@ function handlePointerUp() {
   setIsDragging(false);
 }
 function handleQuestionClick(id) {
-    setActiveQuestionId(id);
-
-    setQuestions(current =>
-        current.map(question =>
-            question.id === id
-                ? {
-                    ...question,
-                    elapsedSeconds: question.elapsedSeconds + 1,
-                }
-                : question
-        )
-    );
+    setActiveQuestionId(id); 
 }
   return (
     <section className="workspace">
