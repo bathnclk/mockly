@@ -26,6 +26,29 @@ function App() {
 
   const [showFinishConfirmModal, setShowFinishConfirmModal] = useState(false); 
   const [drawings, setDrawings] = useState([]);
+const [pdfFile, setPdfFile] = useState(null); 
+const [questionBoxes, setQuestionBoxes] = useState([]);
+const [previewBox, setPreviewBox] = useState(null);
+
+const [activeBoxId, setActiveBoxId] = useState(null);
+const [draggingBoxId, setDraggingBoxId] = useState(null);
+
+const [boxDragOffset, setBoxDragOffset] = useState({
+  x: 0,
+  y: 0,
+});
+
+
+
+useEffect(() => {
+  if (examStatus !== "running") return;
+  if (remainingSeconds !== 0) return;
+
+  setExamStatus("finished");
+  setActiveQuestionId(null);
+  setShowFinishConfirmModal(false);
+  setShowStats(true);
+}, [remainingSeconds, examStatus]);
 
   function startExam() {
     setRemainingSeconds(examMinutes * 60);
@@ -91,6 +114,7 @@ function App() {
         remainingSeconds={remainingSeconds}
         onStartExam={() => setShowExamStartModal(true)}
         onFinishExam={() => setShowFinishConfirmModal(true)}
+        hasPdf={pdfFile !== null}
       />
       <Workspace
         examStatus={examStatus}
@@ -102,6 +126,18 @@ function App() {
         activeTool={activeTool} 
         drawings={drawings}
 setDrawings={setDrawings}
+pdfFile={pdfFile}
+    setPdfFile={setPdfFile}
+    questionBoxes={questionBoxes}
+    setQuestionBoxes={setQuestionBoxes}
+    previewBox={previewBox}
+setPreviewBox={setPreviewBox}
+activeBoxId={activeBoxId}
+setActiveBoxId={setActiveBoxId}
+draggingBoxId = {draggingBoxId}
+setDraggingBoxId={setDraggingBoxId}
+boxDragOffset={boxDragOffset}
+setBoxDragOffset={setBoxDragOffset}
       />
       {showStats && (
         <StatsModal questions={questions} onClose={() => setShowStats(false)} />

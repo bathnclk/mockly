@@ -14,9 +14,10 @@ function QuestionMarker({
     <div
   className={`question-item ${isActive ? "active-question" : ""}`}
   style={{
-    left: `${question.x * 100}%`,
-    top: `${question.y * 100}%`,
-  }}
+  left: `${question.x * 100}%`,
+  top: `${question.y * 100}%`,
+  transform: "translate(-50%, -50%)",
+}}
   onPointerDown={(event) => event.stopPropagation()}
   onClick={(event) => {
     event.stopPropagation();

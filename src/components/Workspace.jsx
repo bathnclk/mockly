@@ -9,9 +9,21 @@ function Workspace({
     activeQuestionId,
     setActiveQuestionId, 
     drawings,
-setDrawings,
+    setDrawings,
+    pdfFile,
+    setPdfFile,
+    questionBoxes,
+setQuestionBoxes,
+previewBox,
+setPreviewBox,
+activeBoxId,
+setActiveBoxId,
+draggingBoxId,
+setDraggingBoxId,
+boxDragOffset,
+setBoxDragOffset,
 }) {
-  const [pdfFile, setPdfFile] = useState(null);
+  
 
   const [currentPage, setCurrentPage] = useState(0);
 
@@ -38,7 +50,7 @@ function handleQuestionMouseDown(id) {
     setQuestions((current) => [
       ...current,
       {
-        id: crypto.randomUUID(),
+        id: Date.now().toString(),
         number: current.length + 1,
         page: position.page,
         x: position.x,
@@ -74,13 +86,18 @@ function handlePointerUp() {
   setIsDragging(false);
 }
 function handleQuestionClick(id) {
-    setActiveQuestionId(id); 
+
+  if (examStatus !== "running") {
+    return;
+  }
+
+  setActiveQuestionId(id);
 }
   return (
     <section className="workspace">
       <PdfViewer
   pdfFile={pdfFile}
-  setPdfFile={setPdfFile}
+    setPdfFile={setPdfFile}
   currentPage={currentPage}
   setCurrentPage={setCurrentPage}
   numPages={numPages}
@@ -97,6 +114,18 @@ function handleQuestionClick(id) {
   activeQuestionId={activeQuestionId}
   drawings={drawings}
  setDrawings={setDrawings}
+ questionBoxes={questionBoxes}
+    setQuestionBoxes={setQuestionBoxes}
+    previewBox={previewBox}
+setPreviewBox={setPreviewBox}
+activeBoxId={activeBoxId}
+setActiveBoxId={setActiveBoxId}
+draggingBoxId={draggingBoxId}
+setDraggingBoxId={setDraggingBoxId}
+boxDragOffset={boxDragOffset}
+setBoxDragOffset={setBoxDragOffset}
+setQuestions={setQuestions}
+setActiveQuestionId={setActiveQuestionId}
 />
       <div className="debug-panel">
         {questions.map((q) => (

@@ -1,4 +1,10 @@
 import { formatDuration } from "../utils/formatTime";
+import {
+  PencilLine,
+  Eraser,
+  MapPin,
+  MapPinMinus,
+} from "lucide-react";
 function Toolbar({
   examStatus,
 
@@ -15,57 +21,79 @@ function Toolbar({
   remainingSeconds,
   onStartExam,
   onFinishExam,
+  hasPdf,
 }) {
   return (
     <header className="toolbar">
       <div className="brand">Mockly</div>
 
-      <div className="tools">
+      {hasPdf && (
+  <div className="tools">
         {examStatus === "setup" && (
           <div className="setup-tools">
             <button
-              className={activeTool === "question" ? "selected-tool" : ""}
-              onClick={() => setActiveTool("question")}
-            >
-              Soru Seçici
-            </button>
+  className={activeTool === "question" ? "selected-tool" : ""}
+  onClick={() => setActiveTool("question")}
+>
+  📍 Odak
+</button>
 
-            <button
-              className={activeTool === "delete" ? "selected-tool" : ""}
-              onClick={() => setActiveTool("delete")}
-            >
-              Balon Sil
-            </button>
+<button
+  className={activeTool === "delete" ? "selected-tool" : ""}
+  onClick={() => setActiveTool("delete")}
+>
+  🗑️ Kaldır
+</button>
+
+<button
+    className={activeTool === "box" ? "selected-tool" : ""}
+    onClick={() => setActiveTool("box")}
+>
+    ⬛ Alan
+</button>
+
+<button
+    className={activeTool === "box-delete" ? "selected-tool" : ""}
+    onClick={() => setActiveTool("box-delete")}
+>
+    🗑 Alan Sil
+</button>
           </div>
         )}
         {examStatus === "running" && (
           <>
             <button
-              className={activeTool === "pen" ? "selected-tool" : ""}
-              onClick={() => setActiveTool("pen")}
-            >
-              Kalem
-            </button>
+  className={activeTool === "pen" ? "selected-tool" : ""}
+  onClick={() => setActiveTool("pen")}
+>
+  ✏️ Kalem
+</button>
 
-            <button
-              className={activeTool === "eraser" ? "selected-tool" : ""}
-              onClick={() => setActiveTool("eraser")}
-            >
-              Silgi
-            </button>
+<button
+  className={activeTool === "eraser" ? "selected-tool" : ""}
+  onClick={() => setActiveTool("eraser")}
+>
+  🩹 Silgi
+</button>
           </>
         )}
       </div>
-
-      <div className="exam-actions">
+)}
+      {hasPdf && (
+  <div className="exam-actions">
         {examStatus === "setup" && (
-          <button onClick={onStartExam}>Sınavı Başlat</button>
+          <button onClick={onStartExam}>
+  🚀 Başlat
+</button>
         )}
         {examStatus === "running" && (
           <>
-            <button className="finish-button" onClick={onFinishExam}>
-              Sınavı Bitir
-            </button>
+            <button
+  className="finish-button"
+  onClick={onFinishExam}
+>
+  🏁 Bitir
+</button>
 
             <span className="remaining-time">
               {formatDuration(remainingSeconds)}
@@ -73,6 +101,7 @@ function Toolbar({
           </>
         )}
       </div>
+      )}
     </header>
   );
 }
