@@ -10,6 +10,7 @@ setDraggingBoxId,
 boxDragOffset,
 setBoxDragOffset,
 setQuestionBoxes,
+setQuestions,
 }) {
   return (
     <>
@@ -30,18 +31,29 @@ setQuestionBoxes,
             onPointerDown={(e) => {
     e.stopPropagation();
 
-    // Alan Sil
     if (activeTool === "box-delete") {
-        setQuestionBoxes(current =>
-            current.filter(item => item.id !== box.id)
-        );
 
-        if (activeBoxId === box.id) {
-            setActiveBoxId(null);
-        }
+  // Alanı sil
+  setQuestionBoxes((current) =>
+    current.filter((item) => item.id !== box.id)
+  );
 
-        return;
-    }
+  // Alana bağlı soru balonunu sil
+  if (box.questionId) {
+    setQuestions((current) =>
+      current.filter(
+        (question) => question.id !== box.questionId
+      )
+    );
+  }
+
+  // Aktif alan seçimini temizle
+  if (activeBoxId === box.id) {
+    setActiveBoxId(null);
+  }
+
+  return;
+}
 
     // Alan Düzenle
     if (activeTool === "box-delete") {

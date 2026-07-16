@@ -315,6 +315,7 @@ draggingBoxId ={draggingBoxId}
 setDraggingBoxId ={setDraggingBoxId}
 boxDragOffset={boxDragOffset}
 setBoxDragOffset={setBoxDragOffset}
+setQuestions={setQuestions}
 />
  
              <QuestionLayer
