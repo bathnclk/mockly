@@ -33,11 +33,14 @@ function recalculateSelectedAnswer(updatedDrawings, questionId) {
   const markedAnswers = relatedAnswerBoxes.filter((answerBox) =>
     pageDrawings.some((stroke) =>
       stroke.points.some((point) => {
-        const normalizedX =
-          point.x / canvasRef.current.offsetWidth;
+        const canvas = canvasRef.current;
+const parent = canvas.parentElement;
 
-        const normalizedY =
-          point.y / canvasRef.current.offsetHeight;
+const normalizedX =
+  point.x / parent.clientWidth;
+
+const normalizedY =
+  point.y / parent.clientHeight;
 
         return (
           normalizedX >= answerBox.x &&
@@ -153,25 +156,67 @@ useEffect(() => {
 },[drawings,currentPage]);
 
 function eraseAt(x, y) {
+  setDrawings((current) => {
+    // Silginin dokunduğu stroke'ları bul
+    const erasedStrokes = current.filter((stroke) => {
+      if (stroke.page !== currentPage) return false;
 
-    setDrawings(current =>
-        current.filter(stroke => {
+      return stroke.points.some((point) => {
+        const dx = point.x - x;
+        const dy = point.y - y;
 
-            if (stroke.page !== currentPage)
-                return true;
+        return Math.sqrt(dx * dx + dy * dy) < 18;
+      });
+    });
 
-            return !stroke.points.some(point => {
+    // Silinen stroke'lardan herhangi biri
+    // bir cevap kutusunun içinden geçiyor mu?
+    erasedStrokes.forEach((stroke) => {
+      const touchedAnswerBox = answerBoxes.find((answerBox) => {
+        if (answerBox.page !== currentPage) return false;
 
-                const dx = point.x - x;
-                const dy = point.y - y;
+        return stroke.points.some((point) => {
+          const normalizedX =
+            point.x / canvasRef.current.offsetWidth;
 
-                return Math.sqrt(dx*dx + dy*dy) < 18;
+          const normalizedY =
+            point.y / canvasRef.current.offsetHeight;
 
-            });
+          return (
+            normalizedX >= answerBox.x &&
+            normalizedX <= answerBox.x + answerBox.width &&
+            normalizedY >= answerBox.y &&
+            normalizedY <= answerBox.y + answerBox.height
+          );
+        });
+      });
 
-        })
-    );
+      if (touchedAnswerBox) {
+        setQuestions((questions) =>
+          questions.map((question) =>
+            question.id === touchedAnswerBox.questionId
+              ? {
+                  ...question,
+                  selectedAnswer: null,
+                }
+              : question
+          )
+        );
+      }
+    });
 
+    // Stroke'u çizimlerden kaldır
+    return current.filter((stroke) => {
+      if (stroke.page !== currentPage) return true;
+
+      return !stroke.points.some((point) => {
+        const dx = point.x - x;
+        const dy = point.y - y;
+
+        return Math.sqrt(dx * dx + dy * dy) < 18;
+      });
+    });
+  });
 }
 
 function handlePointerDown(event) {
@@ -326,11 +371,14 @@ const touchedAnswerBox = answerBoxes.find((answerBox) => {
   if (answerBox.page !== currentPage) return false;
 
   return points.some((point) => {
-    const normalizedX =
-      point.x / canvasRef.current.offsetWidth;
+    const canvas = canvasRef.current;
+const parent = canvas.parentElement;
 
-    const normalizedY =
-      point.y / canvasRef.current.offsetHeight;
+const normalizedX =
+  point.x / parent.clientWidth;
+
+const normalizedY =
+  point.y / parent.clientHeight;
 
     return (
       normalizedX >= answerBox.x &&
