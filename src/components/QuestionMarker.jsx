@@ -30,13 +30,21 @@ function QuestionMarker({
     onClick?.();
   }}
 >
-      <button
-  className="question-marker"
-  onClick={onClick}
-  onPointerDown={onMouseDown}
->
-  {question.number}
-</button>
+      <div className="question-marker-row">
+  <button
+    className="question-marker"
+    onClick={onClick}
+    onPointerDown={onMouseDown}
+  >
+    {question.number}
+  </button>
+
+  {question.selectedAnswer && (
+    <span className="selected-answer">
+      {question.selectedAnswer}
+    </span>
+  )}
+</div>
 
       {(question.elapsedSeconds > 0 || isActive) && (
     <div

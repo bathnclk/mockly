@@ -8,6 +8,9 @@ function DrawingCanvas({
   questionBoxes,
   setActiveQuestionId,
   onUserActivity,
+  answerBoxes,
+questions,
+setQuestions,
 }) {
   const canvasRef = useRef(null); 
 const isDrawing = useRef(false);
@@ -16,6 +19,54 @@ const drawingPointerId = useRef(null);
 
 const animationFrame = useRef(null);
 
+function recalculateSelectedAnswer(updatedDrawings, questionId) {
+  const relatedAnswerBoxes = answerBoxes.filter(
+    (answerBox) =>
+      answerBox.questionId === questionId &&
+      answerBox.page === currentPage
+  );
+
+  const pageDrawings = updatedDrawings.filter(
+    (drawing) => drawing.page === currentPage
+  );
+
+  const markedAnswers = relatedAnswerBoxes.filter((answerBox) =>
+    pageDrawings.some((stroke) =>
+      stroke.points.some((point) => {
+        const normalizedX =
+          point.x / canvasRef.current.offsetWidth;
+
+        const normalizedY =
+          point.y / canvasRef.current.offsetHeight;
+
+        return (
+          normalizedX >= answerBox.x &&
+          normalizedX <= answerBox.x + answerBox.width &&
+          normalizedY >= answerBox.y &&
+          normalizedY <= answerBox.y + answerBox.height
+        );
+      })
+    )
+  );
+
+  // Sadece 1 şık işaretliyse onu seç
+  // 0 veya birden fazla şık varsa null
+  const selectedAnswer =
+    markedAnswers.length === 1
+      ? markedAnswers[0].value
+      : null;
+
+  setQuestions((current) =>
+    current.map((question) =>
+      question.id === questionId
+        ? {
+            ...question,
+            selectedAnswer,
+          }
+        : question
+    )
+  );
+}
 useEffect(() => {
   const canvas = canvasRef.current;
   if (!canvas) return;
@@ -269,6 +320,40 @@ function handlePointerUp(event) {
         points,
       },
     ]);
+
+    // Çizginin hangi cevap kutusuna denk geldiğini bul
+const touchedAnswerBox = answerBoxes.find((answerBox) => {
+  if (answerBox.page !== currentPage) return false;
+
+  return points.some((point) => {
+    const normalizedX =
+      point.x / canvasRef.current.offsetWidth;
+
+    const normalizedY =
+      point.y / canvasRef.current.offsetHeight;
+
+    return (
+      normalizedX >= answerBox.x &&
+      normalizedX <= answerBox.x + answerBox.width &&
+      normalizedY >= answerBox.y &&
+      normalizedY <= answerBox.y + answerBox.height
+    );
+  });
+});
+
+
+if (touchedAnswerBox) {
+  setQuestions((current) =>
+    current.map((question) =>
+      question.id === touchedAnswerBox.questionId
+        ? {
+            ...question,
+            selectedAnswer: touchedAnswerBox.value,
+          }
+        : question
+    )
+  );
+}
   }
 
   currentStroke.current = [];

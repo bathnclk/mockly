@@ -408,6 +408,9 @@ onPointerLeave={handlePointerUp}
     questionBoxes={questionBoxes}
   setActiveQuestionId={setActiveQuestionId}
   onUserActivity={onUserActivity}
+  answerBoxes={answerBoxes}
+  questions={questions}
+  setQuestions={setQuestions}
 />
 <QuestionBoxLayer
     currentPage={currentPage}
