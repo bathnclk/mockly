@@ -10,6 +10,7 @@ function QuestionLayer({
   pageHeight,
   onQuestionClick,
   activeQuestionId,
+  
 }) {
   return (
     <>

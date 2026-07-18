@@ -22,6 +22,10 @@ draggingBoxId,
 setDraggingBoxId,
 boxDragOffset,
 setBoxDragOffset,
+hideQuestionBoxes,
+onUserActivity,
+answerBoxes,
+setAnswerBoxes,
 }) {
   
 
@@ -126,6 +130,11 @@ boxDragOffset={boxDragOffset}
 setBoxDragOffset={setBoxDragOffset}
 setQuestions={setQuestions}
 setActiveQuestionId={setActiveQuestionId}
+hideQuestionBoxes={hideQuestionBoxes}
+onUserActivity={onUserActivity}
+answerBoxes={answerBoxes}
+  setAnswerBoxes={setAnswerBoxes}
+  examStatus={examStatus}
 />
       <div className="debug-panel">
         {questions.map((q) => (

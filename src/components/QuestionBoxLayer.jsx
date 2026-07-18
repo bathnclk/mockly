@@ -11,6 +11,9 @@ boxDragOffset,
 setBoxDragOffset,
 setQuestionBoxes,
 setQuestions,
+hideQuestionBoxes,
+setResizingBox,
+setAnswerBoxes,
 }) {
   return (
     <>
@@ -18,67 +21,111 @@ setQuestions,
         .filter(box => box.page === currentPage)
         .map(box => (
           <div
-            key={box.id}
-            className={`question-box ${
-              activeBoxId === box.id ? "question-box-active" : ""
-            }`}
-            style={{
-              left: `${box.x * 100}%`,
-              top: `${box.y * 100}%`,
-              width: `${box.width * 100}%`,
-              height: `${box.height * 100}%`,
-            }}
-            onPointerDown={(e) => {
+  key={box.id}
+  className={`question-box ${
+  activeBoxId === box.id ? "question-box-active" : ""
+} ${
+  hideQuestionBoxes ? "question-box-hidden" : ""
+}`}
+  style={{
+  left: `${box.x * 100}%`,
+  top: `${box.y * 100}%`,
+  width: `${box.width * 100}%`,
+  height: `${box.height * 100}%`,
+
+  pointerEvents:
+    activeTool === "box" || activeTool === "box-delete"
+      ? "auto"
+      : "none",
+}}
+  onPointerDown={(e) => {
     e.stopPropagation();
 
     if (activeTool === "box-delete") {
+      setQuestionBoxes((current) =>
+        current.filter((item) => item.id !== box.id)
+      );
 
-  // Alanı sil
-  setQuestionBoxes((current) =>
-    current.filter((item) => item.id !== box.id)
-  );
+      setAnswerBoxes((current) =>
+  current.filter(
+    (answerBox) => answerBox.questionBoxId !== box.id
+  )
+);
 
-  // Alana bağlı soru balonunu sil
-  if (box.questionId) {
-    setQuestions((current) =>
-      current.filter(
-        (question) => question.id !== box.questionId
-      )
-    );
-  }
+      if (box.questionId) {
+        setQuestions((current) =>
+          current.filter(
+            (question) => question.id !== box.questionId
+          )
+        );
+      }
 
-  // Aktif alan seçimini temizle
-  if (activeBoxId === box.id) {
-    setActiveBoxId(null);
-  }
+      setActiveBoxId(null);
+      return;
+    }
 
-  return;
-}
+    if (activeTool !== "box") return;
 
-    // Alan Düzenle
-    if (activeTool === "box-delete") {
-    setQuestionBoxes(current =>
-        current.filter(item => item.id !== box.id)
-    );
-
-    setActiveBoxId(null);
-    return;
-}
-
-if (activeTool !== "box") return;
+    const rect =
+      e.currentTarget.parentElement.getBoundingClientRect();
 
     setBoxDragOffset({
-        x: (e.clientX - e.currentTarget.parentElement.getBoundingClientRect().left) /
-            e.currentTarget.parentElement.getBoundingClientRect().width - box.x,
-
-        y: (e.clientY - e.currentTarget.parentElement.getBoundingClientRect().top) /
-            e.currentTarget.parentElement.getBoundingClientRect().height - box.y,
+      x: (e.clientX - rect.left) / rect.width - box.x,
+      y: (e.clientY - rect.top) / rect.height - box.y,
     });
 
     setActiveBoxId(box.id);
     setDraggingBoxId(box.id);
-}}
-          />
+  }}
+>
+  {activeBoxId === box.id && activeTool === "box" && (
+  <>
+    <div
+      className="resize-handle resize-nw"
+      onPointerDown={(e) => {
+        e.stopPropagation();
+        setResizingBox({
+          id: box.id,
+          direction: "nw",
+        });
+      }}
+    />
+
+    <div
+      className="resize-handle resize-ne"
+      onPointerDown={(e) => {
+        e.stopPropagation();
+        setResizingBox({
+          id: box.id,
+          direction: "ne",
+        });
+      }}
+    />
+
+    <div
+      className="resize-handle resize-sw"
+      onPointerDown={(e) => {
+        e.stopPropagation();
+        setResizingBox({
+          id: box.id,
+          direction: "sw",
+        });
+      }}
+    />
+
+    <div
+      className="resize-handle resize-se"
+      onPointerDown={(e) => {
+        e.stopPropagation();
+        setResizingBox({
+          id: box.id,
+          direction: "se",
+        });
+      }}
+    />
+  </>
+)}
+</div>
         ))}
 
       {previewBox && (

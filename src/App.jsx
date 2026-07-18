@@ -4,9 +4,8 @@ import Toolbar from "./components/Toolbar";
 import Workspace from "./components/Workspace";
 import StatsModal from "./components/StatsModal";
 import ExamStartModal from "./components/ExamStartModal";
-import FinishConfirmModal from "./components/FinishConfirmModal";
-import { useState, useEffect } from "react";
-
+import FinishConfirmModal from "./components/FinishConfirmModal"; 
+import { useState, useEffect, useRef } from "react";
 function App() {
   const [examStatus, setExamStatus] = useState("setup");
   // setup | running | finished
@@ -33,12 +32,18 @@ const [previewBox, setPreviewBox] = useState(null);
 const [activeBoxId, setActiveBoxId] = useState(null);
 const [draggingBoxId, setDraggingBoxId] = useState(null);
 
+const inactivityTimeoutRef = useRef(null);
+
 const [boxDragOffset, setBoxDragOffset] = useState({
   x: 0,
   y: 0,
 });
 
+const [hideQuestionBoxes, setHideQuestionBoxes] = useState(false);
 
+const [idleSeconds, setIdleSeconds] = useState(0);
+
+const [answerBoxes, setAnswerBoxes] = useState([]);
 
 useEffect(() => {
   if (examStatus !== "running") return;
@@ -51,16 +56,26 @@ useEffect(() => {
 }, [remainingSeconds, examStatus]);
 
   function startExam() {
-    setRemainingSeconds(examMinutes * 60);
+  setRemainingSeconds(examMinutes * 60);
 
-    setExamStatus("running");
+  setIdleSeconds(0);
 
-    setActiveTool("pen");
+  setExamStatus("running");
+  setActiveTool("pen");
+  setActiveQuestionId(null);
+  setShowExamStartModal(false);
+}
 
-    setActiveQuestionId(null);
+useEffect(() => {
+  if (examStatus !== "running") return;
+  if (activeQuestionId !== null) return;
 
-    setShowExamStartModal(false);
-  }
+  const interval = setInterval(() => {
+    setIdleSeconds((current) => current + 1);
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, [examStatus, activeQuestionId]);
 
   useEffect(() => {
     if (examStatus !== "running") return;
@@ -102,6 +117,29 @@ useEffect(() => {
     return () => clearInterval(interval);
   }, [examStatus]);
 
+  function handleUserActivity() {
+  if (examStatus !== "running") return;
+  if (activeQuestionId === null) return;
+
+  // Önceki 4 saniyelik sayacı iptal et
+  if (inactivityTimeoutRef.current) {
+    clearTimeout(inactivityTimeoutRef.current);
+  }
+
+  // Son aktiviteden 4 saniye sonra soruyu pasif yap
+  inactivityTimeoutRef.current = setTimeout(() => {
+    setActiveQuestionId(null);
+  }, 6000);
+}
+
+useEffect(() => {
+  return () => {
+    if (inactivityTimeoutRef.current) {
+      clearTimeout(inactivityTimeoutRef.current);
+    }
+  };
+}, []);
+
   return (
     <main className="app">
       <Toolbar
@@ -115,6 +153,8 @@ useEffect(() => {
         onStartExam={() => setShowExamStartModal(true)}
         onFinishExam={() => setShowFinishConfirmModal(true)}
         hasPdf={pdfFile !== null}
+        hideQuestionBoxes={hideQuestionBoxes}
+  setHideQuestionBoxes={setHideQuestionBoxes}
       />
       <Workspace
         examStatus={examStatus}
@@ -138,9 +178,17 @@ draggingBoxId = {draggingBoxId}
 setDraggingBoxId={setDraggingBoxId}
 boxDragOffset={boxDragOffset}
 setBoxDragOffset={setBoxDragOffset}
+hideQuestionBoxes={hideQuestionBoxes} 
+onUserActivity={handleUserActivity}
+answerBoxes={answerBoxes}
+  setAnswerBoxes={setAnswerBoxes}
       />
       {showStats && (
-        <StatsModal questions={questions} onClose={() => setShowStats(false)} />
+        <StatsModal
+  questions={questions}
+  idleSeconds={idleSeconds}
+  onClose={() => setShowStats(false)}
+/>
       )}
       {showExamStartModal && (
         <ExamStartModal

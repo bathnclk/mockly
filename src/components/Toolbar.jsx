@@ -22,6 +22,8 @@ function Toolbar({
   onStartExam,
   onFinishExam,
   hasPdf,
+  hideQuestionBoxes,
+setHideQuestionBoxes,
 }) {
   return (
     <header className="toolbar">
@@ -75,6 +77,15 @@ function Toolbar({
 >
   🩹 Silgi
 </button>
+<label className="hide-boxes-toggle">
+    <input
+      type="checkbox"
+      checked={hideQuestionBoxes}
+      onChange={(e) => setHideQuestionBoxes(e.target.checked)}
+    />
+
+    <span>Alanları Gizle</span>
+  </label>
           </>
         )}
       </div>

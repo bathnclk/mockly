@@ -1,6 +1,8 @@
 import { formatDuration, formatQuestionTime } from "../utils/formatTime";
 
-function StatsModal({ questions, onClose }) {
+function StatsModal({  questions,
+  idleSeconds,
+  onClose, }) {
   const solvedQuestions = questions.filter(
     (question) => question.elapsedSeconds > 0,
   );
@@ -42,6 +44,11 @@ function StatsModal({ questions, onClose }) {
             <span>Ortalama Soru Süresi</span>
             <strong>{formatQuestionTime(averageSeconds)}</strong>
           </div>
+
+          <div className="stat-row">
+  <span>Eylemsiz Süre</span>
+  <strong>{formatQuestionTime(idleSeconds)}</strong>
+</div>
 
           {longestQuestion && (
             <div className="summary-row">

@@ -7,10 +7,12 @@ function DrawingCanvas({
   activeTool,
   questionBoxes,
   setActiveQuestionId,
+  onUserActivity,
 }) {
   const canvasRef = useRef(null); 
 const isDrawing = useRef(false);
 const currentStroke = useRef([]);
+const drawingPointerId = useRef(null);
 
 const animationFrame = useRef(null);
 
@@ -122,6 +124,15 @@ function eraseAt(x, y) {
 }
 
 function handlePointerDown(event) {
+
+  const isPencil = event.pointerType === "pen";
+  const isMouse = event.pointerType === "mouse";
+
+  // Sadece Pencil veya mouse çizim yapabilir
+  if (!isPencil && !isMouse) {
+    return;
+  }
+ 
   event.preventDefault();
   event.stopPropagation();
 
@@ -130,6 +141,9 @@ function handlePointerDown(event) {
 
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
+ 
+
+  onUserActivity?.();
 
   // Kalem veya silgi değilse çık
   if (!["pen", "eraser"].includes(activeTool)) return;
@@ -157,12 +171,18 @@ function handlePointerDown(event) {
 
   // Silgi seçiliyse sil ve çık
   if (activeTool === "eraser") {
-    eraseAt(x, y);
-    return;
-  }
+  onUserActivity?.();
+  eraseAt(x, y);
+  return;
+}
+
 
   // Buradan sonrası kalem
-  isDrawing.current = true;
+
+  // Bu pointer artık çizim yapan aktif pointer
+drawingPointerId.current = event.pointerId;
+
+  isDrawing.current = true; 
 
   event.currentTarget.setPointerCapture(event.pointerId);
 
@@ -181,49 +201,87 @@ function handlePointerDown(event) {
 }
 
 function handlePointerMove(event) {
+
+  const isPencil = event.pointerType === "pen";
+  const isMouse = event.pointerType === "mouse";
+
+  if (!isPencil && !isMouse) {
+    return;
+  }
+
+  if (event.pointerId !== drawingPointerId.current) {
+    return;
+  }
+
   event.preventDefault();
   event.stopPropagation();
 
   const canvas = canvasRef.current;
-  const ctx = canvas.getContext("2d");
-
   const rect = canvas.getBoundingClientRect();
 
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
 
-  // Önce silgiyi kontrol et
+  // Silgi
   if (activeTool === "eraser") {
+    onUserActivity?.();
     eraseAt(x, y);
     return;
   }
 
-  // Sonra kalem kontrolü
+  // Kalemle aktif çizim yoksa çık
   if (!isDrawing.current) return;
 
+  // Bu hareket aktif Pencil'a ait değilse çık
+  if (event.pointerId !== drawingPointerId.current) {
+    return;
+  }
+
+  onUserActivity?.();
+
   currentStroke.current.push({ x, y });
- 
 }
+
 function handlePointerUp(event) {
+
+  // Parmak kalktıysa Pencil çizimini etkileme
+  if (event.pointerType === "touch") {
+    return;
+  }
+
+  // Kalkan pointer aktif çizim pointer'ı değilse
+  // Pencil çizimini bitirme
+  if (event.pointerId !== drawingPointerId.current) {
+    return;
+  }
+
   if (!isDrawing.current) return;
 
   isDrawing.current = false;
 
   const points = [...currentStroke.current];
 
-  console.log("KAYDEDİLEN POINTS:", points);
-
-  setDrawings((current) => [
-    ...current,
-    {
-      page: currentPage,
-      points,
-    },
-  ]);
+  if (points.length > 0) {
+    setDrawings((current) => [
+      ...current,
+      {
+        page: currentPage,
+        points,
+      },
+    ]);
+  }
 
   currentStroke.current = [];
 
-  event.currentTarget.releasePointerCapture(event.pointerId);
+  // Pointer capture varsa bırak
+  if (
+    event.currentTarget.hasPointerCapture?.(event.pointerId)
+  ) {
+    event.currentTarget.releasePointerCapture(event.pointerId);
+  }
+
+  // Aktif Pencil pointer'ını temizle
+  drawingPointerId.current = null;
 }
 
 useEffect(() => {
@@ -281,6 +339,8 @@ useEffect(() => {
       ? "auto"
       : "none",
 
+  touchAction: "pinch-zoom",
+
   cursor:
     activeTool === "pen"
       ? "crosshair"
@@ -289,10 +349,10 @@ useEffect(() => {
       : "default",
 }}
   onPointerDown={handlePointerDown}
-onPointerMove={handlePointerMove}
-onPointerUp={handlePointerUp}
-onPointerLeave={handlePointerUp}
-onPointerCancel={handlePointerUp}
+  onPointerMove={handlePointerMove}
+  onPointerUp={handlePointerUp}
+  onPointerLeave={handlePointerUp}
+  onPointerCancel={handlePointerUp}
 />
   );
 }

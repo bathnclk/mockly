@@ -6,6 +6,7 @@ import { useRef } from "react";
 import QuestionLayer from "./QuestionLayer";
 import QuestionBoxLayer from "./QuestionBoxLayer";
 import QuestionBoxTool from "./QuestionBoxTool";
+import AnswerBoxLayer from "./AnswerBoxLayer";
 
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
@@ -28,8 +29,7 @@ function PdfViewer({
   moveQuestion,
 draggingQuestionId,
 onPointerUp,
-onQuestionClick,
-
+onQuestionClick, 
   activeQuestionId,
   drawings,
 setDrawings,
@@ -44,10 +44,16 @@ setDraggingBoxId,
 boxDragOffset,
 setBoxDragOffset,
 setQuestions,
-setActiveQuestionId
+setActiveQuestionId,
+hideQuestionBoxes,
+onUserActivity,
+answerBoxes,
+setAnswerBoxes,
+examStatus,
 }){ 
    const pageContainerRef = useRef(null);
 const boxStartRef = useRef(null);
+const [resizingBox, setResizingBox] = useState(null);
 
   function handlePageClick(event) {
     if (activeTool !== "question") return;
@@ -165,6 +171,40 @@ function handleBoxPointerUp() {
     }
   ]);
 
+  const answers = ["A", "B", "C", "D", "E"];
+
+const answerWidth = 0.045;
+const answerHeight = 0.035;
+const gap = 0.012;
+
+const startX = previewBox.x;
+const startY =
+  previewBox.y +
+  previewBox.height -
+  answerHeight;
+
+const newAnswerBoxes = answers.map((value, index) => ({
+  id: `${boxId}-answer-${value}`,
+
+  questionBoxId: boxId,
+  questionId: questionId,
+
+  page: currentPage,
+
+  value,
+
+  x: startX + index * (answerWidth + gap),
+  y: startY,
+
+  width: answerWidth,
+  height: answerHeight,
+}));
+
+setAnswerBoxes((current) => [
+  ...current,
+  ...newAnswerBoxes,
+]);
+
   boxStartRef.current = null;
   setPreviewBox(null);
 }
@@ -200,7 +240,68 @@ function handlePointerMove(event) {
     if (!pageContainerRef.current) return;
 
     const rect = pageContainerRef.current.getBoundingClientRect();
+    const pointerX =
+    (event.clientX - rect.left) / rect.width;
 
+  const pointerY =
+    (event.clientY - rect.top) / rect.height;
+
+
+  // RESIZE
+  if (resizingBox) {
+    setQuestionBoxes((current) =>
+      current.map((box) => {
+        if (box.id !== resizingBox.id) return box;
+
+        let x = box.x;
+        let y = box.y;
+        let width = box.width;
+        let height = box.height;
+
+        const right = box.x + box.width;
+        const bottom = box.y + box.height;
+
+        if (resizingBox.direction === "se") {
+          width = pointerX - box.x;
+          height = pointerY - box.y;
+        }
+
+        if (resizingBox.direction === "sw") {
+          x = pointerX;
+          width = right - pointerX;
+          height = pointerY - box.y;
+        }
+
+        if (resizingBox.direction === "ne") {
+          y = pointerY;
+          width = pointerX - box.x;
+          height = bottom - pointerY;
+        }
+
+        if (resizingBox.direction === "nw") {
+          x = pointerX;
+          y = pointerY;
+          width = right - pointerX;
+          height = bottom - pointerY;
+        }
+
+        // Minimum kutu boyutu
+        if (width < 0.03 || height < 0.03) {
+          return box;
+        }
+
+        return {
+          ...box,
+          x,
+          y,
+          width,
+          height,
+        };
+      })
+    );
+
+    return;
+  }
     // KUTU TAŞIMA
     if (draggingBoxId) {
 
@@ -234,6 +335,10 @@ function handlePointerMove(event) {
 }
 function handlePointerUp(event){
 
+  if (resizingBox) {
+  setResizingBox(null);
+  return;
+}
     if (draggingBoxId){
 
         setDraggingBoxId(null);
@@ -302,6 +407,7 @@ onPointerLeave={handlePointerUp}
     activeTool={activeTool}
     questionBoxes={questionBoxes}
   setActiveQuestionId={setActiveQuestionId}
+  onUserActivity={onUserActivity}
 />
 <QuestionBoxLayer
     currentPage={currentPage}
@@ -316,8 +422,16 @@ setDraggingBoxId ={setDraggingBoxId}
 boxDragOffset={boxDragOffset}
 setBoxDragOffset={setBoxDragOffset}
 setQuestions={setQuestions}
+hideQuestionBoxes={hideQuestionBoxes}
+ setResizingBox={setResizingBox}
+ setAnswerBoxes={setAnswerBoxes}
 />
- 
+ <AnswerBoxLayer
+  currentPage={currentPage}
+  answerBoxes={answerBoxes}
+  setAnswerBoxes={setAnswerBoxes}
+  examStatus={examStatus}
+/>
              <QuestionLayer
   questions={questions}
   currentPage={currentPage}
@@ -334,7 +448,10 @@ setQuestions={setQuestions}
           <div className="pdf-controls">
             <button
               disabled={currentPage === 1}
-              onClick={() => setCurrentPage((page) => page - 1)}
+              onClick={() => {
+    setActiveQuestionId(null);
+    setCurrentPage((page) => page - 1);
+  }}
             >
               ◀
             </button>
@@ -345,7 +462,10 @@ setQuestions={setQuestions}
 
             <button
               disabled={currentPage === numPages}
-              onClick={() => setCurrentPage((page) => page + 1)}
+              onClick={() => {
+    setActiveQuestionId(null);
+    setCurrentPage((page) => page + 1);
+  }}
             >
               ▶
             </button>
